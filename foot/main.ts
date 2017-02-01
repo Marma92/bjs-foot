@@ -11,28 +11,40 @@ module BABYLON {
 
         private _light: PointLight = null;
 
+        private _camera: FreeCamera = null;
+
         constructor (scene: Scene) {
             this.scene = scene;
         }
 
         // Setups collisions on objects and camera
         public setupCollisions (): void {
-            
+            // Setup camera collisions
+            this.scene.gravity = new Vector3(0, -0.981, 0);
+            this._camera.ellipsoid = new Vector3(2, 3, 2);
+
+            this._camera.checkCollisions = true;
+            this._camera.applyGravity = true;
+
+            this._ground.checkCollisions = true;
+            this._ball.checkCollisions = true;
+
+            this._obstacles.forEach((o) => o.checkCollisions = true);
         }
 
         // Setups the meshes used to play football
         public createMeshes (): void {
             // Create camera
-            var camera = new FreeCamera("camera", new Vector3(15, 15, 15), this.scene);
-            camera.attachControl(this.scene.getEngine().getRenderingCanvas());
+            this._camera = new FreeCamera("camera", new Vector3(15, 15, 15), this.scene);
+            this._camera.attachControl(this.scene.getEngine().getRenderingCanvas());
 
             // Map ZQSD keys to move camera
-            camera.keysUp = [90]; // Z
-            camera.keysDown = [83]; // S
-            camera.keysLeft = [81] // Q
-            camera.keysRight = [68]; // D
+            this._camera.keysUp = [90]; // Z
+            this._camera.keysDown = [83]; // S
+            this._camera.keysLeft = [81] // Q
+            this._camera.keysRight = [68]; // D
 
-            camera.setTarget(new Vector3(0, 0, 0));
+            this._camera.setTarget(new Vector3(0, 0, 0));
 
             // Create light
             this._light = new PointLight("light", new Vector3(0, 100, 0), this.scene);
