@@ -37,9 +37,10 @@
         var scene = new BABYLON.Scene(engine);
 
         var main = new BABYLON.Main(scene);
-        main.main();
+        main.createMeshes();
+        main.setupCollisions();
 
-        scene.debugLayer.show();
+        // scene.debugLayer.show();
 
         engine.runRenderLoop(function() {
             scene.render();
