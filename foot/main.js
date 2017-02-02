@@ -11,8 +11,28 @@ var BABYLON;
             this._camera = null;
             this.scene = scene;
         }
+        // Setup post-processes
+        Main.prototype.setupPostProcesses = function () {
+            var originalPass = new BABYLON.PassPostProcess("pass", 1.0, this._camera);
+            var brightPass = new BABYLON.PostProcess("brightPass", "BloomIT", ["threshold"], [], 1.0, this._camera);
+            brightPass.onApply = function (effect) {
+                effect.setFloat("threshold", 0.5);
+            };
+            var blurH = new BABYLON.BlurPostProcess("blurH", new BABYLON.Vector2(1, 0), 2.0, 0.25, this._camera);
+            var blurV = new BABYLON.BlurPostProcess("blurV", new BABYLON.Vector2(0, 1), 2.0, 0.25, this._camera);
+            var bloom = new BABYLON.PostProcess("bloom", "Bloom2IT", [], ["originalSampler"], 1.0, this._camera);
+            bloom.onApply = function (effect) {
+                effect.setTextureFromPostProcess("originalSampler", originalPass);
+            };
+            // Same but better :)
+            /*
+            var pp = new StandardRenderingPipeline("pp", this.scene, 1.0, null, this.scene.cameras);
+            pp.lensTexture = new Texture("assets/lensdirt.jpg", this.scene);
+            */
+        };
         // Setup a basic shader
         Main.prototype.setupBasicShader = function () {
+            var _this = this;
             // Why not :)
             var material = new BABYLON.ShaderMaterial("shaderMaterial", this.scene, {
                 vertex: "IT",
@@ -25,7 +45,7 @@ var BABYLON;
             });
             var time = 0;
             material.onBind = function (mesh) {
-                time += 16;
+                time += _this.scene.getEngine().getDeltaTime();
                 material.setFloat("time", time);
             };
             material.setTexture("makiTexture", new BABYLON.Texture("assets/ball.png", this.scene));

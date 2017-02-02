@@ -17,6 +17,29 @@ module BABYLON {
             this.scene = scene;
         }
 
+        // Setup post-processes
+        public setupPostProcesses (): void {
+            var originalPass = new PassPostProcess("pass", 1.0, this._camera);
+            var brightPass = new PostProcess("brightPass", "BloomIT", ["threshold"], [], 1.0, this._camera);
+            brightPass.onApply = (effect: Effect) => {
+                effect.setFloat("threshold", 0.5);
+            };
+
+            var blurH = new BlurPostProcess("blurH", new Vector2(1, 0), 2.0, 0.25, this._camera);
+            var blurV = new BlurPostProcess("blurV", new Vector2(0, 1), 2.0, 0.25, this._camera);
+            
+            var bloom = new PostProcess("bloom", "Bloom2IT", [], ["originalSampler"], 1.0, this._camera);
+            bloom.onApply = (effect: Effect) => {
+                effect.setTextureFromPostProcess("originalSampler", originalPass);
+            };
+
+            // Same but better :)
+            /*
+            var pp = new StandardRenderingPipeline("pp", this.scene, 1.0, null, this.scene.cameras);
+            pp.lensTexture = new Texture("assets/lensdirt.jpg", this.scene);
+            */
+        }
+
         // Setup a basic shader
         public setupBasicShader (): void {
             // Why not :)
@@ -35,7 +58,7 @@ module BABYLON {
 
             var time = 0;
             material.onBind = (mesh: AbstractMesh) => {
-                time += 16;
+                time += this.scene.getEngine().getDeltaTime();
                 material.setFloat("time", time);
             };
 
