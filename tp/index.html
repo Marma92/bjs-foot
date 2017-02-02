@@ -36,6 +36,8 @@
         var engine = new BABYLON.Engine(canvas);
         var scene = new BABYLON.Scene(engine);
 
+        var tp = new BABYLON.TP(scene);
+        tp.createMeshes();
         engine.runRenderLoop(function() {
             scene.render();
         });
