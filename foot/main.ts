@@ -20,7 +20,28 @@ module BABYLON {
         // Setup a basic shader
         public setupBasicShader (): void {
             // Why not :)
-            
+            var material = new ShaderMaterial("shaderMaterial", this.scene,
+                {
+                    vertex: "IT",
+                    fragment: "IT"
+                },
+                {
+                    // Options
+                    attributes: ["position", "uv"],
+                    uniforms: ["worldViewProjection", "time"],
+                    samplers: ["makiTexture"]
+                }
+            );
+
+            var time = 0;
+            material.onBind = (mesh: AbstractMesh) => {
+                time += 16;
+                material.setFloat("time", time);
+            };
+
+            material.setTexture("makiTexture", new Texture("assets/ball.png", this.scene));
+
+            this._ball.material = material;
         }
 
         // Setups the physics bodies of each meshes

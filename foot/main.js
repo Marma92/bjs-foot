@@ -14,6 +14,22 @@ var BABYLON;
         // Setup a basic shader
         Main.prototype.setupBasicShader = function () {
             // Why not :)
+            var material = new BABYLON.ShaderMaterial("shaderMaterial", this.scene, {
+                vertex: "IT",
+                fragment: "IT"
+            }, {
+                // Options
+                attributes: ["position", "uv"],
+                uniforms: ["worldViewProjection", "time"],
+                samplers: ["makiTexture"]
+            });
+            var time = 0;
+            material.onBind = function (mesh) {
+                time += 16;
+                material.setFloat("time", time);
+            };
+            material.setTexture("makiTexture", new BABYLON.Texture("assets/ball.png", this.scene));
+            this._ball.material = material;
         };
         // Setups the physics bodies of each meshes
         Main.prototype.setupPhysics = function () {
