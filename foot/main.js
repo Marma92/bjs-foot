@@ -11,6 +11,14 @@ var BABYLON;
             this._camera = null;
             this.scene = scene;
         }
+        // Create a dynamic texture
+        Main.prototype.setupDynamicTexture = function () {
+            var textTexture = new BABYLON.DynamicTexture("textExample", { width: 512, height: 512 }, this.scene, false);
+            textTexture.drawText("Hello my name is", 100, 100, "arial 12 px", "rgb(255, 255, 255)", "#000000");
+            textTexture.update(false);
+            // Apply on the ground
+            this._ground.material.diffuseTexture = textTexture;
+        };
         // Setup post-processes
         Main.prototype.setupPostProcesses = function () {
             var originalPass = new BABYLON.PassPostProcess("pass", 1.0, this._camera);
