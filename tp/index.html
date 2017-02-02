@@ -38,6 +38,7 @@
 
         var tp = new BABYLON.TP(scene);
         tp.createMeshes();
+        tp.setupPhysics();
         engine.runRenderLoop(function() {
             scene.render();
         });
