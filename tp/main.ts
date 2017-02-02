@@ -32,7 +32,7 @@ module BABYLON {
           this._camera.setTarget(new Vector3(0, 0, 0));
 
           // Create light
-          this._light = new PointLight("light", new Vector3(0, 100, 0), this.scene);
+          this._light = new PointLight("light", new Vector3(10, 72, 0), this.scene);
 
           // Create scene meshes
           this._ground = <GroundMesh> Mesh.CreateGround("ground", 100, 50, 2, this.scene);
@@ -59,14 +59,26 @@ module BABYLON {
 
           this._skybox.material = skyboxMaterial;
 
-          /*
-          // Create obstacles
-          var leftCube = Mesh.CreateBox("leftCube", 10, this.scene);
-          leftCube.position.x -= this._ground._width / 2;
-          leftCube.position.y = 5;
-          leftCube.scaling.z = 5;
-          leftCube.scaling.x = 0.1;
+          // Create materual CubeTexture
 
+          var materialCube = new BABYLON.StandardMaterial("assets/cube.png", this.scene);
+
+          // Create obstacles
+          var listCube = [];
+          for (var i : number = 0; i <10; i++){
+            var cube = Mesh.CreateBox("cube"+i, 10, this.scene);
+            cube.position.x = 0;
+            cube.position.y = 10 +5*i;
+            cube.material = materialCube;
+            listCube[i] = cube;
+          }
+          /*
+          var leftCube = Mesh.CreateBox("leftCube", 10, this.scene);
+          leftCube.position.x = 0;
+          leftCube.position.y = 5;
+          */
+
+          /*
           var rightCube = Mesh.CreateBox("rightCube", 10, this.scene);
           rightCube.position.x += this._ground._width / 2; // Same as left cube except +this._ground._height
           rightCube.position.y = 5;

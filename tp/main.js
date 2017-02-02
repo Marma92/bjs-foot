@@ -16,7 +16,7 @@ var BABYLON;
             this._camera.keysLeft = [81];
             this._camera.keysRight = [68];
             this._camera.setTarget(new BABYLON.Vector3(0, 0, 0));
-            this._light = new BABYLON.PointLight("light", new BABYLON.Vector3(0, 100, 0), this.scene);
+            this._light = new BABYLON.PointLight("light", new BABYLON.Vector3(10, 72, 0), this.scene);
             this._ground = BABYLON.Mesh.CreateGround("ground", 100, 50, 2, this.scene);
             var groundMaterial = new BABYLON.StandardMaterial("ground", this.scene);
             this._ground.material = groundMaterial;
@@ -31,6 +31,15 @@ var BABYLON;
             skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
             skyboxMaterial.disableLighting = true;
             this._skybox.material = skyboxMaterial;
+            var materialCube = new BABYLON.StandardMaterial("assets/cube.png", this.scene);
+            var listCube = [];
+            for (var i = 0; i < 10; i++) {
+                var cube = BABYLON.Mesh.CreateBox("cube" + i, 10, this.scene);
+                cube.position.x = 0;
+                cube.position.y = 10 + 5 * i;
+                cube.material = materialCube;
+                listCube[i] = cube;
+            }
         };
         return TP;
     }());
