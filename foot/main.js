@@ -11,6 +11,35 @@ var BABYLON;
             this._camera = null;
             this.scene = scene;
         }
+        // Setup a basic shader
+        Main.prototype.setupBasicShader = function () {
+            // Why not :)
+        };
+        // Setups the physics bodies of each meshes
+        Main.prototype.setupPhysics = function () {
+            var _this = this;
+            // Setup physics in scene
+            this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+            // Set physics bodies
+            this._ground.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
+            this._ball.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 1 });
+            // Set physics bodies of obstacles
+            this._obstacles.forEach(function (o) { return o.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 }); });
+            // Tap the ball
+            this._ball.actionManager = new BABYLON.ActionManager(this.scene);
+            this._ball.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function (evt) {
+                var pick = _this.scene.pick(_this.scene.pointerX, _this.scene.pointerY);
+                var coef = 1;
+                var force = pick.pickedPoint.subtract(_this._camera.position);
+                force = force.multiply(new BABYLON.Vector3(coef, coef, coef));
+                _this._ball.applyImpulse(force, pick.pickedPoint);
+                setTimeout(function () {
+                    _this._ball.position = new BABYLON.Vector3(0, 5, 0);
+                    _this._ball.getPhysicsImpostor().dispose();
+                    _this._ball.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 1 });
+                }, 5000);
+            }));
+        };
         // Setups collisions on objects and camera
         Main.prototype.setupCollisions = function () {
             // Setup camera collisions
@@ -25,7 +54,7 @@ var BABYLON;
         // Setups the meshes used to play football
         Main.prototype.createMeshes = function () {
             // Create camera
-            this._camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(15, 15, 15), this.scene);
+            this._camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(15, 6, 0), this.scene);
             this._camera.attachControl(this.scene.getEngine().getRenderingCanvas());
             // Map ZQSD keys to move camera
             this._camera.keysUp = [90]; // Z

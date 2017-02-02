@@ -17,6 +17,46 @@ module BABYLON {
             this.scene = scene;
         }
 
+        // Setup a basic shader
+        public setupBasicShader (): void {
+            // Why not :)
+            
+        }
+
+        // Setups the physics bodies of each meshes
+        public setupPhysics (): void {
+            // Setup physics in scene
+            this.scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
+
+            // Set physics bodies
+            this._ground.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 });
+            this._ball.setPhysicsState(PhysicsEngine.SphereImpostor, { mass: 1 });
+
+            // Set physics bodies of obstacles
+            this._obstacles.forEach((o) => o.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 }));
+
+            // Tap the ball
+            this._ball.actionManager = new ActionManager(this.scene);
+
+            this._ball.actionManager.registerAction(
+                new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, (evt) => {
+                    var pick = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
+                    
+                    var coef = 1;
+                    var force = pick.pickedPoint.subtract(this._camera.position);
+                    force = force.multiply(new Vector3(coef, coef, coef));
+
+                    this._ball.applyImpulse(force, pick.pickedPoint);
+
+                    setTimeout(() => {
+                        this._ball.position = new Vector3(0, 5, 0);
+                        this._ball.getPhysicsImpostor().dispose();
+                        this._ball.setPhysicsState(PhysicsEngine.SphereImpostor, { mass: 1 });
+                    }, 5000);
+                })
+            );
+        }
+
         // Setups collisions on objects and camera
         public setupCollisions (): void {
             // Setup camera collisions
@@ -35,7 +75,7 @@ module BABYLON {
         // Setups the meshes used to play football
         public createMeshes (): void {
             // Create camera
-            this._camera = new FreeCamera("camera", new Vector3(15, 15, 15), this.scene);
+            this._camera = new FreeCamera("camera", new Vector3(15, 6, 0), this.scene);
             this._camera.attachControl(this.scene.getEngine().getRenderingCanvas());
 
             // Map ZQSD keys to move camera
