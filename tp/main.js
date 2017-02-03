@@ -4,9 +4,11 @@ var BABYLON;
         function TP(scene) {
             this._ground = null;
             this._skybox = null;
+            this._listCube = [];
             this._light = null;
             this._camera = null;
             this.scene = scene;
+            this.scene.gravity = new BABYLON.Vector3(0, -0.981, 0);
         }
         TP.prototype.createMeshes = function () {
             this._camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(15, 6, 0), this.scene);
@@ -16,6 +18,7 @@ var BABYLON;
             this._camera.keysLeft = [81];
             this._camera.keysRight = [68];
             this._camera.setTarget(new BABYLON.Vector3(0, 0, 0));
+            this._camera.applyGravity = true;
             this._light = new BABYLON.PointLight("light", new BABYLON.Vector3(10, 72, 0), this.scene);
             this._ground = BABYLON.Mesh.CreateGround("ground", 100, 50, 2, this.scene);
             var groundMaterial = new BABYLON.StandardMaterial("ground", this.scene);
@@ -35,13 +38,40 @@ var BABYLON;
             cubeMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/cube", this.scene);
             cubeMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.INVCUBIC_MODE;
             cubeMaterial.disableLighting = true;
-            var listCube = [];
-            for (var i = 0; i < 15; i++) {
-                var cube = BABYLON.Mesh.CreateBox("cube" + i, 10, this.scene);
-                cube.position.x = 0;
-                cube.position.y = 10 + 5 * i;
-                cube.material = cubeMaterial;
-                listCube[i] = cube;
+            for (var i = 0; i < 10; i++) {
+                for (var j = 0; j < 10; j++) {
+                    var cube = BABYLON.Mesh.CreateBox("cube" + i + '-' + j, 10, this.scene);
+                    cube.position.x = -40 + 15 * j;
+                    cube.position.y = 10 + 15 * i;
+                    cube.material = cubeMaterial;
+                    cube.checkCollisions = true;
+                    this._listCube.push(cube);
+                }
+            }
+            console.log(this._listCube);
+        };
+        TP.prototype.setupPhysics = function () {
+            var _this = this;
+            this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+            this._ground.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
+            var _loop_1 = function () {
+                this_1._listCube[i].setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
+                this_1._listCube[i].actionManager = new BABYLON.ActionManager(this_1.scene);
+                var cube = this_1._listCube[i];
+                cube.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function (evt) {
+                    console.log("PUSH");
+                    var pick = _this.scene.pick(_this.scene.pointerX, _this.scene.pointerY);
+                    var coef = 5;
+                    console.log(coef);
+                    var force = pick.pickedPoint.subtract(_this._camera.position);
+                    force = force.multiply(new BABYLON.Vector3(coef, coef, coef));
+                    cube.applyImpulse(force, pick.pickedPoint);
+                    console.log(cube.name);
+                }));
+            };
+            var this_1 = this;
+            for (var i = 0; i < this._listCube.length; i++) {
+                _loop_1();
             }
         };
         return TP;
