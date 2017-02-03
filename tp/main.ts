@@ -13,7 +13,7 @@ module BABYLON {
       private _lengthArray : number = 5;
       private _widthArray : number = 5;
       private _cubeLength : number = 1;
-      //private _obstacles: Mesh[] = [];
+      private _obstacles: Mesh[] = [];
 
       private _light: PointLight = null;
 
@@ -47,7 +47,7 @@ module BABYLON {
           this._light = new PointLight("light", new Vector3(25, 70, 40), this.scene);
 
           // Create scene meshes
-          this._ground = <GroundMesh> Mesh.CreateGround("ground", 100, 50, 2, this.scene);
+          this._ground = <GroundMesh> Mesh.CreateGround("ground", 50, 25, 2, this.scene);
 
           // Create standard material
           var groundMaterial = new StandardMaterial("ground", this.scene);
@@ -60,7 +60,11 @@ module BABYLON {
           groundMaterial.diffuseColor = Color3.Yellow();
           groundMaterial.specularColor = Color3.Black(); // new Color3(0, 0, 0);
 
+          // Setup physics in scene
+          this.scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
 
+          // Set physics bodies
+          this._ground.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 });
           // Skybox
           this._skybox = Mesh.CreateBox("skybox", 1000, this.scene, false, Mesh.BACKSIDE);
 
@@ -92,39 +96,71 @@ module BABYLON {
           */
 
           for (var i : number = 0; i <this._lengthArray; i++){
+            var z = 0;
             for (var j : number = 0; j <this._widthArray; j++){
               var cube = Mesh.CreateBox("cube"+i+'-'+j, this._cubeLength, this.scene);
-              cube.position.x = i ;
-              cube.position.y = j ;
+              cube.position.x = i * this._cubeLength;
+              cube.position.y = j * this._cubeLength;
+              //cube.position.z = z;
               cube.material = cubeMaterial;
               cube.checkCollisions = true;
               this._listCube.push(cube);
-              this.setupPhysics(cube);
+              this.setupPhysics(cube, "cube");
             }
+            z++;
           }
           console.log(this._listCube);
 
-          this._ball = Mesh.CreateSphere("ball", 16, 1, this.scene);
+
+          var leftCube = Mesh.CreateBox("leftCube", 1, this.scene);
+          leftCube.position.x -= this._ground._width / 2; // Same as left cube except +this._ground._height
+          leftCube.position.y = 0.5;
+          leftCube.scaling.z = this._ground._height;
+          leftCube.scaling.x = 0.1;
+
+
+          var rightCube = Mesh.CreateBox("rightCube", 1, this.scene);
+          rightCube.position.x += this._ground._width / 2; // Same as left cube except +this._ground._height
+          rightCube.position.y = 0.5;
+          rightCube.scaling.z = this._ground._height;
+          rightCube.scaling.x = 0.1;
+
+          var backCube = Mesh.CreateBox("backCube", 1, this.scene);
+          backCube.position.z -= this._ground._height / 2;
+          backCube.position.y = 0.5;
+          backCube.scaling.x = this._ground._width;
+          backCube.scaling.z = 0.1;
+
+          var frontCube = Mesh.CreateBox("frontCube", 1, this.scene);
+          frontCube.position.z += this._ground._height / 2;
+          frontCube.position.y = 0.5;
+          frontCube.scaling.x = this._ground._width;
+          frontCube.scaling.z = 0.1;
+
+          this._obstacles = [leftCube, rightCube, backCube, frontCube];
+
+
+
+          this._ball = Mesh.CreateSphere("ball", 40, 1, this.scene);
           this._ball.position.y = 5;
           this._ball.position.z = 5;
           this._ball.position.x = this._lengthArray/2;
-          this._ball.material = ballMaterial;
-          this.setupPhysics(this._ball);
-          //this.setupPhysics(this._cube);
 
+          this._ball.material = ballMaterial;
+
+          this.setupPhysics(this._ball, "ball");
       }
 
-      // Setups the physics bodies of each meshes
-      public setupPhysics (object:Mesh): void {
-          // Setup physics in scene
-          this.scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
 
-          // Set physics bodies
-          this._ground.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 });
-          object.setPhysicsState(PhysicsEngine.SphereImpostor, { mass: 1 });
-
+      public setupPhysics (object:Mesh, type:string): void {
+          if (type == "ball"){
+            object.setPhysicsState(PhysicsEngine.SphereImpostor, { mass: 1 });
+          }
+          else{
+            object.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 1 });
+          }
           // Set physics bodies of obstacles
-          //this._obstacles.forEach((o) => o.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 }));
+          this._obstacles.forEach((o) => o.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 }));
 
           // Tap the ball
           object.actionManager = new ActionManager(this.scene);

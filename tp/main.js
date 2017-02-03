@@ -9,6 +9,7 @@ var BABYLON;
             this._lengthArray = 5;
             this._widthArray = 5;
             this._cubeLength = 1;
+            this._obstacles = [];
             this._light = null;
             this._camera = null;
             this.scene = scene;
@@ -24,7 +25,7 @@ var BABYLON;
             this._camera.setTarget(new BABYLON.Vector3(0, 0, 0));
             this._camera.applyGravity = true;
             this._light = new BABYLON.PointLight("light", new BABYLON.Vector3(25, 70, 40), this.scene);
-            this._ground = BABYLON.Mesh.CreateGround("ground", 100, 50, 2, this.scene);
+            this._ground = BABYLON.Mesh.CreateGround("ground", 50, 25, 2, this.scene);
             var groundMaterial = new BABYLON.StandardMaterial("ground", this.scene);
             this._ground.material = groundMaterial;
             var grassTexture = new BABYLON.Texture("assets/grass.jpg", this.scene, false, false, BABYLON.Texture.NEAREST_SAMPLINGMODE);
@@ -32,6 +33,8 @@ var BABYLON;
             groundMaterial.diffuseTexture = grassTexture;
             groundMaterial.diffuseColor = BABYLON.Color3.Yellow();
             groundMaterial.specularColor = BABYLON.Color3.Black();
+            this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+            this._ground.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
             this._skybox = BABYLON.Mesh.CreateBox("skybox", 1000, this.scene, false, BABYLON.Mesh.BACKSIDE);
             var skyboxMaterial = new BABYLON.StandardMaterial("skyboxMaterial", this.scene);
             skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/TropicalSunnyDay", this.scene);
@@ -44,29 +47,56 @@ var BABYLON;
             var ballMaterial = new BABYLON.StandardMaterial("ballMaterial", this.scene);
             ballMaterial.diffuseTexture = new BABYLON.Texture("assets/ball.png", this.scene);
             for (var i = 0; i < this._lengthArray; i++) {
+                var z = 0;
                 for (var j = 0; j < this._widthArray; j++) {
                     var cube = BABYLON.Mesh.CreateBox("cube" + i + '-' + j, this._cubeLength, this.scene);
-                    cube.position.x = i;
-                    cube.position.y = j;
+                    cube.position.x = i * this._cubeLength;
+                    cube.position.y = j * this._cubeLength;
                     cube.material = cubeMaterial;
                     cube.checkCollisions = true;
                     this._listCube.push(cube);
-                    this.setupPhysics(cube);
+                    this.setupPhysics(cube, "cube");
                 }
+                z++;
             }
             console.log(this._listCube);
-            this._ball = BABYLON.Mesh.CreateSphere("ball", 16, 1, this.scene);
+            var leftCube = BABYLON.Mesh.CreateBox("leftCube", 1, this.scene);
+            leftCube.position.x -= this._ground._width / 2;
+            leftCube.position.y = 0.5;
+            leftCube.scaling.z = this._ground._height;
+            leftCube.scaling.x = 0.1;
+            var rightCube = BABYLON.Mesh.CreateBox("rightCube", 1, this.scene);
+            rightCube.position.x += this._ground._width / 2;
+            rightCube.position.y = 0.5;
+            rightCube.scaling.z = this._ground._height;
+            rightCube.scaling.x = 0.1;
+            var backCube = BABYLON.Mesh.CreateBox("backCube", 1, this.scene);
+            backCube.position.z -= this._ground._height / 2;
+            backCube.position.y = 0.5;
+            backCube.scaling.x = this._ground._width;
+            backCube.scaling.z = 0.1;
+            var frontCube = BABYLON.Mesh.CreateBox("frontCube", 1, this.scene);
+            frontCube.position.z += this._ground._height / 2;
+            frontCube.position.y = 0.5;
+            frontCube.scaling.x = this._ground._width;
+            frontCube.scaling.z = 0.1;
+            this._obstacles = [leftCube, rightCube, backCube, frontCube];
+            this._ball = BABYLON.Mesh.CreateSphere("ball", 40, 1, this.scene);
             this._ball.position.y = 5;
             this._ball.position.z = 5;
             this._ball.position.x = this._lengthArray / 2;
             this._ball.material = ballMaterial;
-            this.setupPhysics(this._ball);
+            this.setupPhysics(this._ball, "ball");
         };
-        TP.prototype.setupPhysics = function (object) {
+        TP.prototype.setupPhysics = function (object, type) {
             var _this = this;
-            this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
-            this._ground.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
-            object.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 1 });
+            if (type == "ball") {
+                object.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 1 });
+            }
+            else {
+                object.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 1 });
+            }
+            this._obstacles.forEach(function (o) { return o.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 }); });
             object.actionManager = new BABYLON.ActionManager(this.scene);
             object.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function (evt) {
                 var pick = _this.scene.pick(_this.scene.pointerX, _this.scene.pointerY);
