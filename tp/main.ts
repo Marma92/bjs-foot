@@ -6,14 +6,19 @@ module BABYLON {
 
       // Private members
       private _ground: GroundMesh = null;
-      //private _ball: Mesh = null;
+      //private _cube: Mesh = null;
+      private _ball: Mesh = null;
       private _skybox: Mesh = null;
       private _listCube:Mesh[] = [];
+      private _lengthArray : number = 5;
+      private _widthArray : number = 5;
+      private _cubeLength : number = 1;
       //private _obstacles: Mesh[] = [];
 
       private _light: PointLight = null;
 
       private _camera: FreeCamera = null;
+
 
       constructor (scene: Scene) {
           this.scene = scene;
@@ -25,7 +30,7 @@ module BABYLON {
 
 
           // Create camera
-          this._camera = new FreeCamera("camera", new Vector3(15, 6, 0), this.scene);
+          this._camera = new FreeCamera("camera", new Vector3(10, 10, 45), this.scene);
           this._camera.attachControl(this.scene.getEngine().getRenderingCanvas());
 
           // Map ZQSD keys to move camera
@@ -75,16 +80,22 @@ module BABYLON {
           cubeMaterial.disableLighting = true;
 
           // Create obstacles
+          /*
+          this._cube = Mesh.CreateBox("cube", 10, this.scene);
+          this._cube.position.x = 10;
+          this._cube.position.y = 5;
+          this._cube.checkCollisions = true;
+          */
 
-
-          for (var i : number = 0; i <10; i++){
-            for (var j : number = 0; j <10; j++){
-              var cube = Mesh.CreateBox("cube"+i+'-'+j, 10, this.scene);
-              cube.position.x = -40 + 15 * j;
-              cube.position.y = 10 +15*i;
-              cube.material = cubeMaterial;
+          for (var i : number = 0; i <this._lengthArray; i++){
+            for (var j : number = 0; j <this._widthArray; j++){
+              var cube = Mesh.CreateBox("cube"+i+'-'+j, this._cubeLength, this.scene);
+              cube.position.x = i ;
+              cube.position.y = j ;
+              //cube.material = cubeMaterial;
               cube.checkCollisions = true;
               this._listCube.push(cube);
+              this.setupPhysics(cube);
             }
           }
           console.log(this._listCube);
@@ -116,44 +127,43 @@ module BABYLON {
           //this._obstacles = [leftCube, rightCube, backCube, frontCube];
           */
 
+          this._ball = Mesh.CreateSphere("ball", 16, 1, this.scene);
+          this._ball.position.y = 5;
+          this._ball.position.z = 5;
+          this._ball.position.x = this._lengthArray/2;
+          this.setupPhysics(this._ball);
+          //this.setupPhysics(this._cube);
+
       }
 
-      public setupPhysics (): void {
+      // Setups the physics bodies of each meshes
+      public setupPhysics (object:Mesh): void {
           // Setup physics in scene
           this.scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
 
           // Set physics bodies
           this._ground.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 });
+          object.setPhysicsState(PhysicsEngine.SphereImpostor, { mass: 1 });
+
+          // Set physics bodies of obstacles
+          //this._obstacles.forEach((o) => o.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 }));
+
+          // Tap the ball
+          object.actionManager = new ActionManager(this.scene);
+
+          object.actionManager.registerAction(
+              new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, (evt) => {
+                  var pick = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
+
+                  var coef = 1;
+                  var force = pick.pickedPoint.subtract(this._camera.position);
+                  force = force.multiply(new Vector3(coef, coef, coef));
+
+                  object.applyImpulse(force, pick.pickedPoint);
 
 
-          for (var i : number = 0; i < this._listCube.length; i++){
-
-            this._listCube[i].setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 0 });
-            this._listCube[i].actionManager = new ActionManager(this.scene);
-            let cube = this._listCube[i]
-            cube.actionManager.registerAction(
-                new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, (evt) => {
-                    console.log("PUSH");
-
-                    var pick = this.scene.pick(this.scene.pointerX, this.scene.pointerY);
-
-                    var coef = 5;
-                    console.log(coef);
-                    var force = pick.pickedPoint.subtract(this._camera.position);
-                    force = force.multiply(new Vector3(coef, coef, coef));
-
-                    cube.applyImpulse(force, pick.pickedPoint);
-                    console.log(cube.name);
-                    /*setTimeout(() => {
-                        cube.getPhysicsImpostor().dispose();
-                        cube.setPhysicsState(PhysicsEngine.BoxImpostor, { mass: 1 });
-                    }, 0);*/
-                })
-            );
-            //console.log(cube.position.x);
-          }
-
-
+              })
+          );
       }
     }
 }

@@ -3,15 +3,19 @@ var BABYLON;
     var TP = (function () {
         function TP(scene) {
             this._ground = null;
+            this._ball = null;
             this._skybox = null;
             this._listCube = [];
+            this._lengthArray = 5;
+            this._widthArray = 5;
+            this._cubeLength = 1;
             this._light = null;
             this._camera = null;
             this.scene = scene;
             this.scene.gravity = new BABYLON.Vector3(0, -0.981, 0);
         }
         TP.prototype.createMeshes = function () {
-            this._camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(15, 6, 0), this.scene);
+            this._camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(10, 10, 45), this.scene);
             this._camera.attachControl(this.scene.getEngine().getRenderingCanvas());
             this._camera.keysUp = [90];
             this._camera.keysDown = [83];
@@ -38,41 +42,36 @@ var BABYLON;
             cubeMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/cube", this.scene);
             cubeMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.INVCUBIC_MODE;
             cubeMaterial.disableLighting = true;
-            for (var i = 0; i < 10; i++) {
-                for (var j = 0; j < 10; j++) {
-                    var cube = BABYLON.Mesh.CreateBox("cube" + i + '-' + j, 10, this.scene);
-                    cube.position.x = -40 + 15 * j;
-                    cube.position.y = 10 + 15 * i;
-                    cube.material = cubeMaterial;
+            for (var i = 0; i < this._lengthArray; i++) {
+                for (var j = 0; j < this._widthArray; j++) {
+                    var cube = BABYLON.Mesh.CreateBox("cube" + i + '-' + j, this._cubeLength, this.scene);
+                    cube.position.x = i;
+                    cube.position.y = j;
                     cube.checkCollisions = true;
                     this._listCube.push(cube);
+                    this.setupPhysics(cube);
                 }
             }
             console.log(this._listCube);
+            this._ball = BABYLON.Mesh.CreateSphere("ball", 16, 1, this.scene);
+            this._ball.position.y = 5;
+            this._ball.position.z = 5;
+            this._ball.position.x = this._lengthArray / 2;
+            this.setupPhysics(this._ball);
         };
-        TP.prototype.setupPhysics = function () {
+        TP.prototype.setupPhysics = function (object) {
             var _this = this;
             this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
             this._ground.setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
-            var _loop_1 = function () {
-                this_1._listCube[i].setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0 });
-                this_1._listCube[i].actionManager = new BABYLON.ActionManager(this_1.scene);
-                var cube = this_1._listCube[i];
-                cube.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function (evt) {
-                    console.log("PUSH");
-                    var pick = _this.scene.pick(_this.scene.pointerX, _this.scene.pointerY);
-                    var coef = 5;
-                    console.log(coef);
-                    var force = pick.pickedPoint.subtract(_this._camera.position);
-                    force = force.multiply(new BABYLON.Vector3(coef, coef, coef));
-                    cube.applyImpulse(force, pick.pickedPoint);
-                    console.log(cube.name);
-                }));
-            };
-            var this_1 = this;
-            for (var i = 0; i < this._listCube.length; i++) {
-                _loop_1();
-            }
+            object.setPhysicsState(BABYLON.PhysicsEngine.SphereImpostor, { mass: 1 });
+            object.actionManager = new BABYLON.ActionManager(this.scene);
+            object.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function (evt) {
+                var pick = _this.scene.pick(_this.scene.pointerX, _this.scene.pointerY);
+                var coef = 1;
+                var force = pick.pickedPoint.subtract(_this._camera.position);
+                force = force.multiply(new BABYLON.Vector3(coef, coef, coef));
+                object.applyImpulse(force, pick.pickedPoint);
+            }));
         };
         return TP;
     }());
