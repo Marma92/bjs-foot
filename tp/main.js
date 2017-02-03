@@ -31,13 +31,16 @@ var BABYLON;
             skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
             skyboxMaterial.disableLighting = true;
             this._skybox.material = skyboxMaterial;
-            var materialCube = new BABYLON.StandardMaterial("assets/cube.png", this.scene);
+            var cubeMaterial = new BABYLON.StandardMaterial("cubeTexture", this.scene);
+            cubeMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/cube", this.scene);
+            cubeMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.INVCUBIC_MODE;
+            cubeMaterial.disableLighting = true;
             var listCube = [];
-            for (var i = 0; i < 10; i++) {
+            for (var i = 0; i < 15; i++) {
                 var cube = BABYLON.Mesh.CreateBox("cube" + i, 10, this.scene);
                 cube.position.x = 0;
                 cube.position.y = 10 + 5 * i;
-                cube.material = materialCube;
+                cube.material = cubeMaterial;
                 listCube[i] = cube;
             }
         };

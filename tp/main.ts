@@ -52,6 +52,7 @@ module BABYLON {
           // Skybox
           this._skybox = Mesh.CreateBox("skybox", 1000, this.scene, false, Mesh.BACKSIDE);
 
+
           var skyboxMaterial = new StandardMaterial("skyboxMaterial", this.scene);
           skyboxMaterial.reflectionTexture = new CubeTexture("assets/TropicalSunnyDay", this.scene);
           skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
@@ -59,17 +60,20 @@ module BABYLON {
 
           this._skybox.material = skyboxMaterial;
 
-          // Create materual CubeTexture
+          // Create material CubeTexture
 
-          var materialCube = new BABYLON.StandardMaterial("assets/cube.png", this.scene);
+          var cubeMaterial = new StandardMaterial("cubeTexture", this.scene);
+          cubeMaterial.reflectionTexture = new CubeTexture("assets/cube", this.scene);
+          cubeMaterial.reflectionTexture.coordinatesMode = Texture.INVCUBIC_MODE;
+          cubeMaterial.disableLighting = true;
 
           // Create obstacles
           var listCube = [];
-          for (var i : number = 0; i <10; i++){
+          for (var i : number = 0; i <15; i++){
             var cube = Mesh.CreateBox("cube"+i, 10, this.scene);
             cube.position.x = 0;
             cube.position.y = 10 +5*i;
-            cube.material = materialCube;
+            cube.material = cubeMaterial;
             listCube[i] = cube;
           }
           /*
