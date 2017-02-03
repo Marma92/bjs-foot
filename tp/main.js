@@ -35,9 +35,8 @@ var BABYLON;
             skyboxMaterial.disableLighting = true;
             this._skybox.material = skyboxMaterial;
             var cubeMaterial = new BABYLON.StandardMaterial("cubeTexture", this.scene);
-            cubeMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/cube", this.scene);
-            cubeMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.INVCUBIC_MODE;
-            cubeMaterial.disableLighting = true;
+            cubeMaterial.diffuseTexture = new BABYLON.Texture("assets/cube_nx.jpg", this.scene);
+            cubeMaterial.diffuseTexture.hasAlpha = true;
             for (var i = 0; i < 10; i++) {
                 for (var j = 0; j < 10; j++) {
                     var cube = BABYLON.Mesh.CreateBox("cube" + i + '-' + j, 10, this.scene);

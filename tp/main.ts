@@ -70,9 +70,9 @@ module BABYLON {
           // Create material CubeTexture
 
           var cubeMaterial = new StandardMaterial("cubeTexture", this.scene);
-          cubeMaterial.reflectionTexture = new CubeTexture("assets/cube", this.scene);
-          cubeMaterial.reflectionTexture.coordinatesMode = Texture.INVCUBIC_MODE;
-          cubeMaterial.disableLighting = true;
+          cubeMaterial.diffuseTexture = new Texture("assets/cube_nx.jpg", this.scene);
+          cubeMaterial.diffuseTexture.hasAlpha = true;
+
 
           // Create obstacles
 
