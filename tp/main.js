@@ -3,12 +3,11 @@ var BABYLON;
     var TP = (function () {
         function TP(scene) {
             this._ground = null;
-            this._ball = null;
             this._skybox = null;
             this._listCube = [];
-            this._lengthArray = 5;
-            this._widthArray = 5;
-            this._cubeLength = 1;
+            this._lengthArray = 10;
+            this._widthArray = 10;
+            this._cubeLength = 0.5;
             this._obstacles = [];
             this._light = null;
             this._camera = null;
@@ -51,7 +50,8 @@ var BABYLON;
                 for (var j = 0; j < this._widthArray; j++) {
                     var cube = BABYLON.Mesh.CreateBox("cube" + i + '-' + j, this._cubeLength, this.scene);
                     cube.position.x = i * this._cubeLength;
-                    cube.position.y = j * this._cubeLength;
+                    cube.position.y = 0.5 + j * this._cubeLength;
+                    cube.position.z = z;
                     cube.material = cubeMaterial;
                     cube.checkCollisions = true;
                     this._listCube.push(cube);
@@ -59,7 +59,6 @@ var BABYLON;
                 }
                 z++;
             }
-            console.log(this._listCube);
             var leftCube = BABYLON.Mesh.CreateBox("leftCube", 1, this.scene);
             leftCube.position.x -= this._ground._width / 2;
             leftCube.position.y = 0.5;
@@ -81,12 +80,14 @@ var BABYLON;
             frontCube.scaling.x = this._ground._width;
             frontCube.scaling.z = 0.1;
             this._obstacles = [leftCube, rightCube, backCube, frontCube];
-            this._ball = BABYLON.Mesh.CreateSphere("ball", 40, 1, this.scene);
-            this._ball.position.y = 5;
-            this._ball.position.z = 5;
-            this._ball.position.x = this._lengthArray / 2;
-            this._ball.material = ballMaterial;
-            this.setupPhysics(this._ball, "ball");
+            for (var i = 0; i < 5; i++) {
+                var ball = BABYLON.Mesh.CreateSphere("ball" + i, 40, 1, this.scene);
+                ball.position.y = 5;
+                ball.position.z = 5;
+                ball.position.x = i;
+                ball.material = ballMaterial;
+                this.setupPhysics(ball, "ball");
+            }
         };
         TP.prototype.setupPhysics = function (object, type) {
             var _this = this;

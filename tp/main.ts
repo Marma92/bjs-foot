@@ -7,12 +7,12 @@ module BABYLON {
       // Private members
       private _ground: GroundMesh = null;
       //private _cube: Mesh = null;
-      private _ball: Mesh = null;
+
       private _skybox: Mesh = null;
       private _listCube:Mesh[] = [];
-      private _lengthArray : number = 5;
-      private _widthArray : number = 5;
-      private _cubeLength : number = 1;
+      private _lengthArray : number = 10;
+      private _widthArray : number = 10;
+      private _cubeLength : number = 0.5;
       private _obstacles: Mesh[] = [];
 
       private _light: PointLight = null;
@@ -86,22 +86,13 @@ module BABYLON {
           var ballMaterial = new StandardMaterial("ballMaterial", this.scene);
           ballMaterial.diffuseTexture= new Texture("assets/ball.png", this.scene);
 
-
-          // Create obstacles
-          /*
-          this._cube = Mesh.CreateBox("cube", 10, this.scene);
-          this._cube.position.x = 10;
-          this._cube.position.y = 5;
-          this._cube.checkCollisions = true;
-          */
-
           for (var i : number = 0; i <this._lengthArray; i++){
             var z = 0;
             for (var j : number = 0; j <this._widthArray; j++){
               var cube = Mesh.CreateBox("cube"+i+'-'+j, this._cubeLength, this.scene);
               cube.position.x = i * this._cubeLength;
-              cube.position.y = j * this._cubeLength;
-              //cube.position.z = z;
+              cube.position.y = 0.5 +j * this._cubeLength;
+              cube.position.z = z;
               cube.material = cubeMaterial;
               cube.checkCollisions = true;
               this._listCube.push(cube);
@@ -109,18 +100,18 @@ module BABYLON {
             }
             z++;
           }
-          console.log(this._listCube);
+
 
 
           var leftCube = Mesh.CreateBox("leftCube", 1, this.scene);
-          leftCube.position.x -= this._ground._width / 2; // Same as left cube except +this._ground._height
+          leftCube.position.x -= this._ground._width / 2;
           leftCube.position.y = 0.5;
           leftCube.scaling.z = this._ground._height;
           leftCube.scaling.x = 0.1;
 
 
           var rightCube = Mesh.CreateBox("rightCube", 1, this.scene);
-          rightCube.position.x += this._ground._width / 2; // Same as left cube except +this._ground._height
+          rightCube.position.x += this._ground._width / 2;
           rightCube.position.y = 0.5;
           rightCube.scaling.z = this._ground._height;
           rightCube.scaling.x = 0.1;
@@ -140,15 +131,16 @@ module BABYLON {
           this._obstacles = [leftCube, rightCube, backCube, frontCube];
 
 
+          for (var i : number = 0; i<5; i++){
+            var ball = Mesh.CreateSphere("ball"+i, 40, 1, this.scene);
+            ball.position.y = 5;
+            ball.position.z = 5;
+            ball.position.x = i
 
-          this._ball = Mesh.CreateSphere("ball", 40, 1, this.scene);
-          this._ball.position.y = 5;
-          this._ball.position.z = 5;
-          this._ball.position.x = this._lengthArray/2;
+            ball.material = ballMaterial;
 
-          this._ball.material = ballMaterial;
-
-          this.setupPhysics(this._ball, "ball");
+            this.setupPhysics(ball, "ball");
+        }
       }
 
 
