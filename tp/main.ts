@@ -44,7 +44,7 @@ module BABYLON {
           this._camera.applyGravity = true;
 
           // Create light
-          this._light = new PointLight("light", new Vector3(10, 72, 0), this.scene);
+          this._light = new PointLight("light", new Vector3(25, 70, 40), this.scene);
 
           // Create scene meshes
           this._ground = <GroundMesh> Mesh.CreateGround("ground", 100, 50, 2, this.scene);
@@ -75,9 +75,13 @@ module BABYLON {
           // Create material CubeTexture
 
           var cubeMaterial = new StandardMaterial("cubeTexture", this.scene);
-          cubeMaterial.reflectionTexture = new CubeTexture("assets/cube", this.scene);
-          cubeMaterial.reflectionTexture.coordinatesMode = Texture.INVCUBIC_MODE;
-          cubeMaterial.disableLighting = true;
+          cubeMaterial.diffuseTexture = new Texture("assets/cube_nx.jpg", this.scene);
+          cubeMaterial.diffuseTexture.hasAlpha = true;
+
+
+          var ballMaterial = new StandardMaterial("ballMaterial", this.scene);
+          ballMaterial.diffuseTexture= new Texture("assets/ball.png", this.scene);
+
 
           // Create obstacles
           /*
@@ -92,45 +96,19 @@ module BABYLON {
               var cube = Mesh.CreateBox("cube"+i+'-'+j, this._cubeLength, this.scene);
               cube.position.x = i ;
               cube.position.y = j ;
-              //cube.material = cubeMaterial;
+              cube.material = cubeMaterial;
               cube.checkCollisions = true;
               this._listCube.push(cube);
               this.setupPhysics(cube);
             }
           }
           console.log(this._listCube);
-          /*
-          var leftCube = Mesh.CreateBox("leftCube", 10, this.scene);
-          leftCube.position.x = 0;
-          leftCube.position.y = 5;
-          */
-
-          /*
-          var rightCube = Mesh.CreateBox("rightCube", 10, this.scene);
-          rightCube.position.x += this._ground._width / 2; // Same as left cube except +this._ground._height
-          rightCube.position.y = 5;
-          rightCube.scaling.z = 5;
-          rightCube.scaling.x = 0.1;
-
-          var backCube = Mesh.CreateBox("backCube", 10, this.scene);
-          backCube.position.z -= this._ground._height / 2;
-          backCube.position.y = 5;
-          backCube.scaling.x = 10;
-          backCube.scaling.z = 0.1;
-
-          var frontCube = Mesh.CreateBox("frontCube", 10, this.scene);
-          frontCube.position.z += this._ground._height / 2;
-          frontCube.position.y = 5;
-          frontCube.scaling.x = 10;
-          frontCube.scaling.z = 0.1;
-
-          //this._obstacles = [leftCube, rightCube, backCube, frontCube];
-          */
 
           this._ball = Mesh.CreateSphere("ball", 16, 1, this.scene);
           this._ball.position.y = 5;
           this._ball.position.z = 5;
           this._ball.position.x = this._lengthArray/2;
+          this._ball.material = ballMaterial;
           this.setupPhysics(this._ball);
           //this.setupPhysics(this._cube);
 
