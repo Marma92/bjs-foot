@@ -19,7 +19,7 @@ var BABYLON;
             this._camera.keysRight = [68];
             this._camera.setTarget(new BABYLON.Vector3(0, 0, 0));
             this._camera.applyGravity = true;
-            this._light = new BABYLON.PointLight("light", new BABYLON.Vector3(10, 72, 0), this.scene);
+            this._light = new BABYLON.PointLight("light", new BABYLON.Vector3(25, 70, 40), this.scene);
             this._ground = BABYLON.Mesh.CreateGround("ground", 100, 50, 2, this.scene);
             var groundMaterial = new BABYLON.StandardMaterial("ground", this.scene);
             this._ground.material = groundMaterial;

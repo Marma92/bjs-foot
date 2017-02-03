@@ -39,7 +39,7 @@ module BABYLON {
           this._camera.applyGravity = true;
 
           // Create light
-          this._light = new PointLight("light", new Vector3(10, 72, 0), this.scene);
+          this._light = new PointLight("light", new Vector3(25, 70, 40), this.scene);
 
           // Create scene meshes
           this._ground = <GroundMesh> Mesh.CreateGround("ground", 100, 50, 2, this.scene);
@@ -73,9 +73,7 @@ module BABYLON {
           cubeMaterial.diffuseTexture = new Texture("assets/cube_nx.jpg", this.scene);
           cubeMaterial.diffuseTexture.hasAlpha = true;
 
-
           // Create obstacles
-
 
           for (var i : number = 0; i <10; i++){
             for (var j : number = 0; j <10; j++){
